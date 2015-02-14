@@ -1,0 +1,23 @@
+{
+    "name": "vend/vacation-bundle",
+    "description": "A bundle to implement the vend/vacation REST API library.",
+    "config": {
+        "bin-dir": "bin"
+    },
+    "require": {
+        "vend/vacation": "dev-master",
+        "jms/serializer-bundle": "~0.13.0"
+    },
+    "autoload":{
+        "psr-4": {
+            "Vend\\Bundle\\VacationBundle\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Malcolm Fell",
+            "email": "malcolm@vendhq.com"
+        }
+    ]
+}

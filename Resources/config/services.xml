@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="vacation.engine.class">Vend\Vacation\Engine</parameter>
+        <parameter key="vacation.controller_registry.class">Vend\Vacation\Controller\Registry</parameter>
+        <parameter key="vacation.controller_resolver.class">Vend\Vacation\Controller\Resolver</parameter>
+        <parameter key="vacation.controller_matcher.class">Vend\Vacation\Controller\Matcher</parameter>
+        <parameter key="vacation.metadata_factory.class">Metadata\MetadataFactory</parameter>
+        <parameter key="vacation.metadata_driver.class">Metadata\Driver\DriverChain</parameter>
+        <parameter key="vacation.metadata_driver.annotation.class">Vend\Vacation\Metadata\Driver\Annotation</parameter>
+        <parameter key="vacation.operation_resolver.class">Vend\Vacation\Operation\Resolver</parameter>
+        <parameter key="vacation.response_builder.class">Vend\Vacation\Response\Builder</parameter>
+        <parameter key="vacation.response_factory.class">Vend\Vacation\Response\Factory</parameter>
+        <parameter key="vacation.request_matcher.class">Vend\Vacation\Request\Matcher</parameter>
+        <parameter key="vacation.serialization_context.class">JMS\Serializer\SerializationContext</parameter>
+        <parameter key="vacation.executor.class">Vend\Vacation\Operation\Executor</parameter>
+        <parameter key="vacation.processor.form.class">Vend\Bundle\VacationBundle\Processor\FormProcessor</parameter>
+    </parameters>
+
+    <services>
+
+        <service id="vacation.metadata_driver.annotation" class="%vacation.metadata_driver.annotation.class%">
+            <argument id="annotation_reader" type="service"/>
+        </service>
+
+        <service id="vacation.metadata_driver" class="%vacation.metadata_driver.class%">
+            <argument type="collection">
+                <argument id="vacation.metadata_driver.annotation" type="service"/>
+            </argument>
+        </service>
+
+        <service id="vacation.metadata_factory" class="%vacation.metadata_factory.class%">
+            <argument id="vacation.metadata_driver" type="service"/>
+        </service>
+
+        <service id="vacation.controller_resolver" class="%vacation.controller_resolver.class%">
+            <argument id="vacation.controller_registry" type="service"/>
+            <argument id="vacation.controller_matcher" type="service"/>
+        </service>
+
+        <service id="vacation.controller_matcher" class="%vacation.controller_matcher.class%">
+            <argument id="vacation.metadata_factory" type="service"/>
+            <argument>/api/2.0</argument>
+        </service>
+
+        <service id="vacation.request_matcher" class="%vacation.request_matcher.class%" scope="request">
+            <argument type="service" id="vacation.controller_registry"/>
+        </service>
+
+        <service id="vacation.operation_resolver" class="%vacation.operation_resolver.class%">
+            <argument id="vacation.metadata_factory" type="service"/>
+        </service>
+
+        <service id="vacation.response_builder" class="%vacation.response_builder.class%">
+            <argument id="vacation.response_factory" type="service"/>
+            <argument id="jms_serializer.serializer" type="service"/>
+            <argument id="event_dispatcher" type="service"/>
+            <argument id="vacation.serialization_context" type="service"/>
+        </service>
+
+        <service id="vacation.serialization_context" class="%vacation.serialization_context.class%">
+            <call method="setSerializeNull">
+                <argument>true</argument>
+            </call>
+            <call method="setVersion">
+                <argument>2.0</argument>
+            </call>
+        </service>
+
+        <service id="vacation.response_factory" class="%vacation.response_factory.class%"/>
+
+        <service id="vacation.controller_registry" class="%vacation.controller_registry.class%"/>
+
+        <service id="vacation.executor" class="%vacation.executor.class%"/>
+
+        <service id="vacation.processor.form" class="%vacation.processor.form.class%">
+            <argument id="form.factory" type="service"/>
+            <tag name="vacation.processor" alias="form"/>
+        </service>
+
+        <service id="vacation.engine" class="%vacation.engine.class%" scope="request">
+            <argument type="service" id="vacation.controller_resolver"/>
+            <argument type="service" id="vacation.operation_resolver"/>
+            <argument type="service" id="vacation.executor"/>
+            <argument type="service" id="vacation.response_builder"/>
+        </service>
+
+        <service id="api" alias="vacation.engine"/>
+
+    </services>
+
+</container>
